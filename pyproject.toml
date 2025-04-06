@@ -1,0 +1,26 @@
+[project]
+name = "ecommerce-backend"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "athar5714", email = "atharshafi5714@gmail.com"},
+]
+dependencies = ["fastapi>=0.115.12", "uvicorn>=0.34.0", "sqlalchemy>=2.0.40", "psycopg2-binary>=2.9.10", "python-jose[cryptography]>=3.4.0", "passlib[bcrypt]>=1.7.4", "pydantic-settings>=2.8.1", "email-validator>=2.2.0", "bcrypt==4.0.1"]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+
+[dependency-groups]
+dev = [
+    "alembic>=1.15.2",
+    "pytest>=8.3.5",
+    "python-dotenv>=1.1.0",
+]
