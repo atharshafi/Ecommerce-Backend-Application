@@ -35,6 +35,7 @@ async def register_user(
         hashed_password = get_password_hash(user.password)
         db_user = UserModel(
             email=user.email,
+            full_name=user.full_name,
             hashed_password=hashed_password,
             is_active=True,
             role="CUSTOMER"  # Hardcoded for security
