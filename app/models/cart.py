@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
-
+# Represents the shopping cart associated with a user
 class Cart(Base):
     __tablename__ = "carts"
 
@@ -12,7 +12,7 @@ class Cart(Base):
     user = relationship("User", back_populates="carts")
     items = relationship("CartItem", back_populates="cart")
 
-
+# Represents an item inside a shopping cart
 class CartItem(Base):
     __tablename__ = "cart_items"
 

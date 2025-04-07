@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.schemas.cart import Cart, CartItemCreate
 from app.services.cart import (
@@ -16,30 +17,30 @@ router = APIRouter(prefix="/cart", tags=["cart"])
 
 @router.get("/", response_model=Cart)
 def get_cart(
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """Get the current user's cart"""
+    # Retrieve current user's cart
     return get_user_cart(db, current_user.id)
 
 
 @router.post("/items/", response_model=Cart)
 def add_item_to_cart(
-        item: CartItemCreate,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    item: CartItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """Add an item to the cart"""
+    # Add a product to the cart
     return add_to_cart(db, current_user.id, item.product_id, item.quantity)
 
 
 @router.delete("/items/{product_id}", response_model=Cart)
 def remove_item_from_cart(
-        product_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """Remove an item from the cart"""
+    # Remove a product from the cart
     cart = remove_from_cart(db, current_user.id, product_id)
     if not cart:
         raise HTTPException(
@@ -51,22 +52,22 @@ def remove_item_from_cart(
 
 @router.delete("/clear", status_code=status.HTTP_204_NO_CONTENT)
 def clear_user_cart(
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """Clear all items from the cart"""
+    # Clear all items in the user's cart
     clear_cart(db, current_user.id)
     return None
 
 
 @router.put("/items/{product_id}", response_model=Cart)
 def update_cart_item(
-        product_id: int,
-        quantity: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    product_id: int,
+    quantity: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """Update item quantity in cart"""
+    # Update the quantity of a specific cart item
     if quantity <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

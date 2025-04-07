@@ -10,20 +10,20 @@ from app.models.user import User
 from app.schemas.user import Token, TokenData
 from app.config import settings
 
-# Password hashing context
+# Context for password hashing using bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
-# OAuth2 scheme for token authentication
+# OAuth2 token scheme for authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hashed version"""
+    """Check if plain password matches hashed password"""
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Generate a password hash"""
+    """Hash a plain password"""
     return pwd_context.hash(password)
 
 
@@ -31,12 +31,11 @@ def create_access_token(
         data: dict,
         expires_delta: Optional[timedelta] = None
 ) -> str:
-    """Create a JWT access token"""
+    """Generate a JWT access token with an optional expiration"""
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-
 
 
 def authenticate_user(
@@ -44,11 +43,9 @@ def authenticate_user(
         email: str,
         password: str
 ) -> Optional[User]:
-    """Authenticate a user with email and password"""
+    """Authenticate user by verifying email and password"""
     user = db.query(User).filter(User.email == email).first()
-    if not user:
-        return None
-    if not verify_password(password, user.hashed_password):
+    if not user or not verify_password(password, user.hashed_password):
         return None
     return user
 
@@ -57,7 +54,7 @@ def get_current_user(
         db: Session = Depends(get_db),
         token: str = Depends(oauth2_scheme)
 ) -> User:
-    """Get the current authenticated user from JWT token"""
+    """Retrieve the current user from JWT token"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -85,7 +82,7 @@ def get_current_user(
 def get_current_active_user(
         current_user: User = Depends(get_current_user)
 ) -> User:
-    """Get current user only if account is active"""
+    """Ensure the current user account is active"""
     if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -100,13 +97,13 @@ def create_user(
         password: str,
         **extra_data
 ) -> User:
-    """Create a new user with hashed password"""
-    # Check if user already exists
+    """Create a new user and hash their password"""
+    # Check if the user already exists
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise ValueError("User already exists")
 
-    # Create new user
+    # Hash the password and create user record
     hashed_password = get_password_hash(password)
     user = User(
         email=email,
@@ -120,7 +117,7 @@ def create_user(
 
 
 def generate_password_reset_token(email: str) -> str:
-    """Generate a password reset token"""
+    """Generate a token for password reset with an expiration"""
     expires = timedelta(hours=settings.password_reset_token_expire_hours)
     return create_access_token(
         data={"sub": email, "type": "reset"},
@@ -144,4 +141,3 @@ def verify_password_reset_token(token: str) -> Optional[str]:
     except JWTError:
         return None
     return email
-

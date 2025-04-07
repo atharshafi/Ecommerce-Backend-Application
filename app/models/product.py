@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
-
+# Represents a product available in the store
 class Product(Base):
     __tablename__ = "products"
 
@@ -11,6 +11,7 @@ class Product(Base):
     description = Column(String)
     price = Column(Float)
     image_url = Column(String)
+    local_image_path = Column(String)
     category = Column(String)
 
     cart_items = relationship("CartItem", back_populates="product")

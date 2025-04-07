@@ -3,8 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
-
-
+# Represents a user's order
 class Order(Base):
     __tablename__ = "orders"
 
@@ -17,7 +16,7 @@ class Order(Base):
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")
 
-
+# Represents an individual item within an order
 class OrderItem(Base):
     __tablename__ = "order_items"
 

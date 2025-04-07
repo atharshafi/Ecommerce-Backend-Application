@@ -3,12 +3,12 @@ from sqlalchemy.orm import relationship
 from app.models.base import Base
 from enum import Enum as PyEnum
 
-
+# Enum for defining user roles
 class UserRole(PyEnum):
     ADMIN = "ADMIN"
     CUSTOMER = "CUSTOMER"
 
-
+# Represents a user of the platform
 class User(Base):
     __tablename__ = "users"
 

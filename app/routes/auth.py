@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import logging
+
 from app.database import get_db
 from app.schemas.user import Token, UserCreate, User
 from app.services.auth import (
@@ -20,10 +21,10 @@ logger = logging.getLogger(__name__)
 
 @router.post("/register", response_model=User)
 async def register_user(
-        user: UserCreate,
-        db: Session = Depends(get_db)
+    user: UserCreate,
+    db: Session = Depends(get_db)
 ):
-    """Register a new user (automatically sets role to CUSTOMER)"""
+    # Create a new user account
     try:
         existing_user = db.query(UserModel).filter(UserModel.email == user.email).first()
         if existing_user:
@@ -38,7 +39,7 @@ async def register_user(
             full_name=user.full_name,
             hashed_password=hashed_password,
             is_active=True,
-            role="CUSTOMER"  # Hardcoded for security
+            role="CUSTOMER"
         )
         db.add(db_user)
         db.commit()
@@ -56,10 +57,10 @@ async def register_user(
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
-        form_data: OAuth2PasswordRequestForm = Depends(),
-        db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
 ):
-    """OAuth2 compatible token login"""
+    # Authenticate user and return JWT access token
     try:
         user = authenticate_user(db, form_data.username, form_data.password)
         if not user:
@@ -97,7 +98,7 @@ async def login_for_access_token(
 
 @router.get("/me", response_model=User)
 async def read_users_me(
-        current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """Get current user details"""
+    # Return the currently authenticated user's details
     return current_user
